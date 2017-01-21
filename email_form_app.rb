@@ -3,6 +3,10 @@ require 'pony'
 require 'dotenv/load'
 require 'pry'
 
+get '/' do
+  "welcome"
+end
+
 post "/send_email_for" do
   if params[:token] = ENV["QUICK_TOKEN"]
     send_email_for("", params)
