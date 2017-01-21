@@ -2,19 +2,17 @@ require 'sinatra'
 require 'pony'
 require 'dotenv/load'
 require 'pry'
+require 'json'
 
 get '/' do
   "welcome"
 end
 
 post "/send_email_for" do
-  if params[:token] = ENV["QUICK_TOKEN"]
-    send_email_for("", params)
-    p request
-    "complete"
-  else
-    "unauthorized"
-  end
+  return "incorrect format" unless request.content_type == 'application/json'
+  request.body.rewind
+  request_payload = JSON.parse request.body.read
+  "complete"
 end
 
 def build_email(params)
