@@ -8,13 +8,13 @@ get '/' do
 end
 
 post "/send_email_for" do
-  # if params[:token] = ENV["QUICK_TOKEN"]
+  if params[:token] = ENV["QUICK_TOKEN"]
     send_email_for("", params)
     p request
     "complete"
-  # else
-    # "unauthorized"
-  # end
+  else
+    "unauthorized"
+  end
 end
 
 def build_email(params)
