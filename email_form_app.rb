@@ -9,10 +9,9 @@ end
 
 post "/send_email_for" do
   # if params[:token] = ENV["QUICK_TOKEN"]
-    # send_email_for("", params)
-    # binding.pry
-    # "complete"
+    send_email_for("", params)
     p request
+    "complete"
   # else
     # "unauthorized"
   # end
@@ -28,17 +27,15 @@ def build_email(params)
     Email: #{email}
     Body: #{body}
   "
-  # return email_body
 end
 
 
 
 def send_email_for(company = "", params)
-  body = build_email(params)
-  puts body
+  email_text = build_email(params)
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
-    body: body,
+    body: email_text,
     via: :smtp,
     via_options: {
       address: "smtp.gmail.com",
