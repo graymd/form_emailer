@@ -1,15 +1,38 @@
 require 'sinatra'
 require 'pony'
 require 'dotenv/load'
+require 'pry'
 
 post "/send_email_for" do
-  send_email_for()
+  if params[:token] = ENV["QUICK_TOKEN"]
+    send_email_for("", params)
+    "complete"
+  else
+    "unauthorized"
+  end
 end
 
-def send_email_for(company = "")
+def build_email(params)
+  name = params[:name]
+  email = params[:email]
+  body = params[:body]
+
+  "
+    Name: #{name}
+    Email: #{email}
+    Body: #{body}
+  "
+  # return email_body
+end
+
+
+
+def send_email_for(company = "", params)
+  body = build_email(params)
+  puts body
   Pony.options = {
-    subject: "testing sinatra email sender",
-    body: "testing body for sinatra email",
+    subject: ENV["COMPANY_NAME"] + " form submission",
+    body: body,
     via: :smtp,
     via_options: {
       address: "smtp.gmail.com",
