@@ -5,11 +5,9 @@ require 'pry'
 require 'json'
 require 'sinatra/cross_origin'
 
-# if Sinatra::Base.development?
 configure do
   enable :cross_origin
 end
-# end
 
 if Sinatra::Base.production?
   set :allow_origin, ENV["ALLOWED_ORIGIN"]
