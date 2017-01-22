@@ -3,12 +3,24 @@ require 'pony'
 require 'dotenv/load'
 require 'pry'
 require 'json'
+require 'sinatra/cross_origin'
+
+configure do
+  enable :cross_origin
+end
+
+options "*" do
+  response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
+  response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+  200
+end
 
 get '/' do
   "welcome"
 end
 
 post "/send_email_for" do
+  p request
   return "incorrect format" unless request.content_type == 'application/json'
   request.body.rewind
   request_payload = JSON.parse request.body.read
