@@ -12,25 +12,31 @@ describe 'Server Service' do
     Sinatra::Application
   end
 
-  it "should load the root page" do
-    get '/'
-    expect(last_response).to be_ok
+  describe 'get /' do
+    it "should load the root page" do
+      get '/'
+      expect(last_response).to be_ok
+    end
   end
 
-  it 'should respond with "incorrect format" when not sent as javascript' do
-    data = {
-      'kitter' => 'cat'
-    }
-    post '/send_email_for'
-    expect(last_response.body).to eq('incorrect format')
-  end
+  describe 'post /send_email_for' do
+    context "when not sent as json" do
+      it 'responds with 415' do
+        post '/send_email_for'
+        p last_response
+        expect(last_response.status).to eq(415)
+      end
+    end
 
-  it 'should respond with "incorrect format" when not sent as javascript' do
-    data = {
-      'kitter' => 'cat'
-    }
-    post '/send_email_for', data.to_json, "CONTENT_TYPE" => "application/json"
-    expect(last_response).to be_ok
+    context "when sent as json" do
+      it 'responds with 250' do
+        data = {
+          'test' => 'test'
+        }
+        post '/send_email_for', data.to_json, "CONTENT_TYPE" => "application/json"
+        expect(last_response.status).to eq(250)
+      end
+    end
   end
 
 end

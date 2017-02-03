@@ -25,10 +25,11 @@ end
 
 post "/send_email_for" do
   p request
-  return "incorrect format" unless request.content_type == 'application/json'
+  return status 415 unless request.content_type == 'application/json'
   request.body.rewind
   request_payload = JSON.parse request.body.read
-  "complete"
+  send_email_for("", build_email(params))
+  status 250
 end
 
 def build_email(params)
@@ -46,6 +47,7 @@ end
 
 
 def send_email_for(company = "", params)
+  return "sent"
   email_text = build_email(params)
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
