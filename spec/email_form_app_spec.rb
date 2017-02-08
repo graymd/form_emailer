@@ -23,7 +23,6 @@ describe 'Server Service' do
     context "when not sent as json" do
       it 'responds with 415' do
         post '/send_email_for'
-        p last_response
         expect(last_response.status).to eq(415)
       end
     end

@@ -24,7 +24,6 @@ get '/' do
 end
 
 post "/send_email_for" do
-  p request
   return status 415 unless request.content_type == 'application/json'
   request.body.rewind
   request_payload = JSON.parse request.body.read
