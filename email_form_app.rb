@@ -24,17 +24,19 @@ get '/' do
 end
 
 post "/send_email_for" do
-  return status 415 unless request.content_type == 'application/json'
+  return status 415  unless request.content_type == 'application/json'
   request.body.rewind
-  request_payload = JSON.parse request.body.read
-  send_email_for("", build_email(params))
+  @request_payload = JSON.parse request.body.read.to_s
+  send_email_for("")
   status 250
 end
 
-def build_email(params)
-  name = params[:name]
-  email = params[:email]
-  body = params[:body]
+private
+
+def build_email()
+  name = @request_payload[:name] || @request_payload['name']
+  email = @request_payload[:email] || @request_payload['email']
+  body = @request_payload[:body] || @request_payload['body']
 
   "
     Name: #{name}
@@ -43,14 +45,10 @@ def build_email(params)
   "
 end
 
-
-
-def send_email_for(company = "", params)
-  return "sent"
-  email_text = build_email(params)
+def send_email_for(company = "")
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
-    body: email_text,
+    body: build_email,
     via: :smtp,
     via_options: {
       address: "smtp.gmail.com",
