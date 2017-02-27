@@ -27,13 +27,14 @@ post "/send_email_for" do
   return status 415  unless request.content_type == 'application/json'
   request.body.rewind
   @request_payload = JSON.parse request.body.read.to_s
-  send_email_for("")
-  status 250
+  puts send_email_for
+  # send_email_for("")
+  [250, [{email_sent: true}.to_json]]
 end
 
 private
 
-def build_email()
+def build_email
   name = @request_payload[:name] || @request_payload['name']
   email = @request_payload[:email] || @request_payload['email']
   body = @request_payload[:body] || @request_payload['body']
@@ -61,4 +62,5 @@ def send_email_for(company = "")
     }
   }
   Pony.mail(to: ENV["SEND_TO_EMAIL"])
+  puts 'email sent'
 end
