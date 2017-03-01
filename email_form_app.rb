@@ -4,6 +4,7 @@ require 'dotenv/load'
 require 'pry'
 require 'json'
 require 'sinatra/cross_origin'
+require 'httparty'
 
 configure do
   enable :cross_origin
@@ -23,16 +24,37 @@ get '/' do
   "welcome"
 end
 
-post "/send_email_for" do
-  return status 415  unless request.content_type == 'application/json'
+post "/send_email" do
+  return status [415, email_sent_response(false)]  unless request.content_type == 'application/json'
   request.body.rewind
   @request_payload = JSON.parse request.body.read.to_s
-  puts send_email_for
-  # send_email_for("")
-  [250, [{email_sent: true}.to_json]]
+  return [400, email_sent_response(false)] unless captcha_response_verified?
+  send_email
+  # send_email("")
+  [250, email_sent_response(true)]
 end
 
 private
+
+def email_sent_response(bool)
+ [{email_sent: bool}.to_json]
+end
+
+def captcha_response_verified?
+  get_captcha_response["success"]
+end
+
+def get_captcha_response
+  url = 'https://www.google.com/recaptcha/api/siteverify'
+  user_captcha_response = @request_payload["captchaResponse"]
+  HTTParty.post(url,
+    :query => {
+      :secret => ENV['CAPTCHA_SECRET_KEY'],
+      :response => user_captcha_response
+    },
+    :headers => { 'Content-Type' => 'application/json' }
+  )
+end
 
 def build_email
   name = @request_payload[:name] || @request_payload['name']
@@ -46,7 +68,9 @@ def build_email
   "
 end
 
-def send_email_for(company = "")
+def send_email(company = "")
+  puts 'sending email'
+  return
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
     body: build_email,
