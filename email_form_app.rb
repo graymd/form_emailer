@@ -26,9 +26,11 @@ end
 
 post "/send_email" do
   return status [415, email_sent_response(false)]  unless request.content_type == 'application/json'
+  puts 'past 415'
   request.body.rewind
   @request_payload = JSON.parse request.body.read.to_s
   return [400, email_sent_response(false)] unless captcha_response_verified?
+  puts 'past 400'
   send_email
   # send_email("")
   [250, email_sent_response(true)]
