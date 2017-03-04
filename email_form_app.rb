@@ -32,7 +32,6 @@ post "/send_email" do
   return [400, email_sent_response(false)] unless captcha_response_verified?
   puts 'past 400'
   send_email
-  # send_email("")
   [250, email_sent_response(true)]
 end
 
@@ -71,8 +70,6 @@ def build_email
 end
 
 def send_email(company = "")
-  puts 'sending email'
-  return
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
     body: build_email,
