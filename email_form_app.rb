@@ -4,6 +4,7 @@ require 'dotenv/load'
 require 'pry'
 require 'json'
 require 'sinatra/cross_origin'
+require 'httparty'
 
 configure do
   enable :cross_origin
@@ -23,18 +24,43 @@ get '/' do
   "welcome"
 end
 
-post "/send_email_for" do
-  return status 415 unless request.content_type == 'application/json'
+post "/send_email" do
+  return status [415, email_sent_response(false)]  unless request.content_type == 'application/json'
+  puts 'past 415'
   request.body.rewind
-  request_payload = JSON.parse request.body.read
-  send_email_for("", build_email(params))
-  status 250
+  @request_payload = JSON.parse request.body.read.to_s
+  return [400, email_sent_response(false)] unless captcha_response_verified?
+  puts 'past 400'
+  send_email
+  [250, email_sent_response(true)]
 end
 
-def build_email(params)
-  name = params[:name]
-  email = params[:email]
-  body = params[:body]
+private
+
+def email_sent_response(bool)
+ [{email_sent: bool}.to_json]
+end
+
+def captcha_response_verified?
+  get_captcha_response["success"]
+end
+
+def get_captcha_response
+  url = 'https://www.google.com/recaptcha/api/siteverify'
+  user_captcha_response = @request_payload["captchaResponse"]
+  HTTParty.post(url,
+    :query => {
+      :secret => ENV['CAPTCHA_SECRET_KEY'],
+      :response => user_captcha_response
+    },
+    :headers => { 'Content-Type' => 'application/json' }
+  )
+end
+
+def build_email
+  name = @request_payload[:name] || @request_payload['name']
+  email = @request_payload[:email] || @request_payload['email']
+  body = @request_payload[:body] || @request_payload['body']
 
   "
     Name: #{name}
@@ -43,14 +69,10 @@ def build_email(params)
   "
 end
 
-
-
-def send_email_for(company = "", params)
-  return "sent"
-  email_text = build_email(params)
+def send_email(company = "")
   Pony.options = {
     subject: ENV["COMPANY_NAME"] + " form submission",
-    body: email_text,
+    body: build_email,
     via: :smtp,
     via_options: {
       address: "smtp.gmail.com",
@@ -63,4 +85,5 @@ def send_email_for(company = "", params)
     }
   }
   Pony.mail(to: ENV["SEND_TO_EMAIL"])
+  puts 'email sent'
 end

@@ -2,6 +2,7 @@
 require_relative '../email_form_app.rb'
 require 'rspec'
 require 'rack/test'
+require 'json'
 
 set :environment, :test
 
@@ -30,12 +31,17 @@ describe 'Server Service' do
     context "when sent as json" do
       it 'responds with 250' do
         data = {
-          'test' => 'test'
+          name: 'name',
+          email: 'email@email.com',
+          body: 'body'
         }
         post '/send_email_for', data.to_json, "CONTENT_TYPE" => "application/json"
         expect(last_response.status).to eq(250)
       end
+
+      it { should have_sent_email }
     end
   end
+
 
 end
