@@ -11,7 +11,7 @@ configure do
 end
 
 if Sinatra::Base.production?
-  set :allow_origin, ENV["ALLOWED_ORIGIN1"]
+  set :allow_origin,  :any  # ENV["ALLOWED_ORIGIN1"]
 end
 
 options "*" do
